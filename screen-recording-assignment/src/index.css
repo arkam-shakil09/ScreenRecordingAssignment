@@ -1,13 +1,22 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.hidden {
+	display: none;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.show {
+	display: block;
+}
+
+.element-opacity {
+	background: rgba(00, 00, 00, 0.4);
+}
+
+#controls-container {
+	position: fixed;
+	left: 45%;
+	bottom: 10%;
+}
+
+#togle-recording-button {
+	background-color: red;
+	color: white;
 }
