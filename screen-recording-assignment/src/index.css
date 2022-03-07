@@ -16,7 +16,8 @@
 	bottom: 10%;
 }
 
-#togle-recording-button {
+#togle-recording-button, #download-button {
+	display: inline-block;
 	background-color: red;
 	color: white;
 }

@@ -23,11 +23,18 @@ function RecordingButton()
 	useEffect(() =>
 	{
 		let recordingButton = document.getElementById("togle-recording-button");
-		let mediaRecorder;
+		var mediaRecorder;
 		$(recordingButton).click(async function ()
 		{
 			if ($(recordingButton).attr("aria-label") == "Start Recording")
 			{
+				try {
+					document.getElementById("download-button").remove();
+				}
+				catch {
+					let x = 0;
+				}
+
 				let mimeType = "video/webm";
 				let stream = await navigator.mediaDevices.getDisplayMedia({
 					audio: true, 
@@ -35,7 +42,7 @@ function RecordingButton()
 				});
 
 				let recordedChunks = []; 
-				const mediaRecorder = new MediaRecorder(stream);
+				mediaRecorder = new MediaRecorder(stream);
 				mediaRecorder.ondataavailable = function (e) {
 					if (e.data.size > 0) {
 						recordedChunks.push(e.data);
@@ -46,29 +53,21 @@ function RecordingButton()
 					const blob = new Blob(recordedChunks, {
 						type: 'video/webm'
 					});
-					let filename = window.prompt('Enter file name'),
-					downloadLink = document.createElement('a');
+					let downloadLink = document.createElement('a');
+					downloadLink.innerText = "Download Recording";
+					downloadLink.setAttribute("id", "download-button");
+					downloadLink.setAttribute("role", "button");
 					downloadLink.href = URL.createObjectURL(blob);
-					downloadLink.download = `${filename}.webm`;
-
-					document.body.appendChild(downloadLink);
-					downloadLink.click();
-					URL.revokeObjectURL(blob); // clear from memory
-					document.body.removeChild(downloadLink);
+					downloadLink.download = "Recording.webm";
+					document.getElementById("controls-container").appendChild(downloadLink);
 
 					recordedChunks = [];
 				};
 				mediaRecorder.start(200); // For every 200ms the stream data will be stored in a separate chunk.
-
-				let node = document.createElement("p");
-				node.textContent = "Started recording";
-				document.body.appendChild(node);
 			}
-			else {
+			else if ($(recordingButton).attr("aria-label") == "Stop Recording")
+			{
 				mediaRecorder.stop();
-				let node = document.createElement("p");
-				node.textContent = "Stopped recording";
-				document.body.appendChild(node);
 			}
 		});
 	}, []);
