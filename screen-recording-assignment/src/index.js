@@ -84,8 +84,10 @@ function App()
 				// was ctrl key pressed on pc during occcurance of event?
 				xtra+=" ctrlKey was pressed.";
 			}
+				//Get the current url
+				let url = window.location.href;
 
-			let msg = "\n EventType: " + et + ", EventTarget: " + trgt + ", Event Tag name: " + trgtTagName + ", Element Name: " + trgtName + ", Event Id: " + trgtId + ", Event Class: " + trgtClass + ", Extra:" + xtra;
+			let msg = "\n EventType: " + et + ", EventTarget: " + trgt + ", Event Tag name: " + trgtTagName + ", Element Name: " + trgtName + ", Event Id: " + trgtId + ", Event Class: " + trgtClass + ", Extra:" + xtra + ", URL: " + url;
 			let p = document.createElement('P');
 			p.innerText = msg;
 			document.body.appendChild(p);
