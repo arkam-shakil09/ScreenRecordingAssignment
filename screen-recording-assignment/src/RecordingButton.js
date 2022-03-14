@@ -2,14 +2,25 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from "react";
 import $ from 'jquery';
+import { saveAs } from 'file-saver';
 import './index.css';
 
 function RecordingButton()
 {
 	let [state, updatedState] = useState("Start Recording");
+	let jsonEventObject: object = {"Event": ""};
+	let jsonObjectArray = [];
+	let eventCount = 1;
 
 	let captureEvents = (e) => 
 	{
+		let jsonObject: object = {
+			"id": "eventCount",
+			"Event": "et",
+			"Element": "trgt",
+			"Url": "url"
+		};
+
 		let evt = e||window.event;
 
 		if(evt) // If event exists
@@ -24,74 +35,17 @@ function RecordingButton()
 			let et = evt.type?evt.type:evt;
 
 			// Get Events Target (Element from which event is bubbled)
-			let trgt = e.target;
+			let trgt = e.target.tagName;
 
-			// Get tag name of Events Target
-			let trgtTagName = e.target.tagName;
-
-			// Get name of Events Target
-			let trgtName = "";
-			if(trgt.getAttribute("aria-label")) {
-				trgtName = trgt.getAttribute("aria-label");
-			}
-			else {
-				trgtName = trgt.innerText;
-			}
-
-			// Get id and class of element
-			let trgtId = "";
-			let trgtClass = "";
-			if(trgt.id){
-			// only id exists
-				trgtId = "#" + trgt.id;
-			}
-			else if(trgt.className){
-			// only class exists
-				trgtClass = "." + trgt.className;
-			}
-
-		// Get extra information about event
-		let xtra="";
-		if(evt.keyCode){
-			// If keyboard Event? get Key code
-			xtra+=" KeyCode: "+evt.keyCode;
-			xtra+=" Key: "+evt.key;
-		}
-			if(evt.shiftKey){
-			// was Shift key pressed during occcurance of event?
-			xtra+= " ShiftKey was pressed.";
-		}
-		if(evt.altKey){
-			// was alt key pressed during occcurance of event?
-			xtra+=" altKey was pressed.";
-		}
-		if(evt.metaKey){
-			// MetaKey is used on Mac instead of ctrl Key on PC
-			xtra+=" metaKey was pressed.";
-		}
-		if(evt.ctrlKey){
-			// was ctrl key pressed on pc during occcurance of event?
-			xtra+=" ctrlKey was pressed.";
-		}
 			//Get the current url
 			let url = window.location.href;
 
-			let msg = "\n EventType: " + et + ", EventTarget: " + trgt + ", Event Tag name: " + trgtTagName + ", Element Name: " + trgtName + ", Event Id: " + trgtId + ", Event Class: " + trgtClass + ", Extra:" + xtra + ", URL: " + url;
-			let p = document.createElement('P');
-			p.innerText = msg;
-			document.body.appendChild(p);
-
-		}
-	}
-
-	let togleRecordingState = () =>
-	{
-		if (state == "Start Recording")
-		{
-			updatedState("Stop Recording");
-		}
-		else {
-			updatedState("Start Recording");
+			jsonObject.id= eventCount;
+			jsonObject.Event = et;
+			jsonObject.Element = trgt;
+			jsonObject.Url = url;
+			eventCount++;
+			jsonObjectArray.push(jsonObject);
 		}
 	}
 
@@ -105,6 +59,7 @@ function RecordingButton()
 
 			if ($(recordingButton).attr("aria-label") == "Start Recording")
 			{
+				updatedState("Stop Recording");
 				try {
 					document.getElementById("download-button").remove();
 				}
@@ -150,14 +105,18 @@ function RecordingButton()
 			}
 			else if ($(recordingButton).attr("aria-label") == "Stop Recording")
 			{
+				updatedState("Start Recording");
 				mediaRecorder.stop();
 
 				//Removing the capture events event from the body
 				for(let i=0; i<events.length; i++)
 				{
 					document.body.removeEventListener("" + events[i] + "", captureEvents);
-alert("" + events[i] + "");
 				}
+
+				jsonEventObject.Event = jsonObjectArray;
+				const blob = new Blob([JSON.stringify(jsonEventObject, null, 4)], {type : 'application/json'});
+				saveAs(blob, 'abc.json');
 			}
 		});
 	}, []);
@@ -165,7 +124,7 @@ alert("" + events[i] + "");
 	return (
 		<>
 			<div id="controls-container">
-				<button id="togle-recording-button" aria-label={state} onClick={togleRecordingState}>
+				<button id="togle-recording-button" aria-label={state}>
 					{state}
 				</button>
 			</div>
