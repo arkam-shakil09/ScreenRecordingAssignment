@@ -11,6 +11,7 @@ function RecordingButton()
 	let jsonEventObject: object = {"Event": ""};
 	let jsonObjectArray = [];
 	let eventCount = 1;
+	let url = "";
 
 	let captureEvents = (e) => 
 	{
@@ -18,7 +19,9 @@ function RecordingButton()
 			"id": "eventCount",
 			"Event": "et",
 			"Element": "trgt",
-			"Url": "url"
+			"Src": "src",
+			"Url": "url",
+			"CurrentUrl": "CurrentUrl"
 		};
 
 		let evt = e||window.event;
@@ -37,20 +40,33 @@ function RecordingButton()
 			// Get Events Target (Element from which event is bubbled)
 			let trgt = e.target.tagName;
 
+			// Get Events source code
+			let src = e.target.parentNode.innerHTML;
+
 			//Get the current url
-			let url = window.location.href;
+			let currentUrl = window.location.href;
 
 			jsonObject.id= eventCount;
 			jsonObject.Event = et;
 			jsonObject.Element = trgt;
+			jsonObject.Src = src;
 			jsonObject.Url = url;
+			jsonObject.CurrentUrl = currentUrl;
 			eventCount++;
 			jsonObjectArray.push(jsonObject);
+
+			//If the url changes, then change the url of 'url' variable
+			if (url != currentUrl)
+			{
+				url = currentUrl;
+			}
+
 		}
 	}
 
 	useEffect(() =>
 	{
+		url = window.location.href;
 		let recordingButton = document.getElementById("togle-recording-button");
 		var mediaRecorder;
 		$(recordingButton).click(async function ()
