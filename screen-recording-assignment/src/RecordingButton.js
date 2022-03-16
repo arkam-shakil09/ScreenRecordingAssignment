@@ -13,12 +13,43 @@ function RecordingButton()
 	let eventCount = 1;
 	let url = "";
 
+	let getIndexForSelector = (element) => {
+		let parent = element.parentNode;
+		let child, index = 1;
+
+		for (child = parent.firstElementChild; child; child = child.nextElementSibling)
+		{
+			if (child === element) {
+				return index;
+			}
+			++index;
+				}
+		return -1;
+	}
+
+
+	let getSelector = (element)  =>
+	{
+		let selector = element.tagName + ":nth-child(" + getIndexForSelector(element) + ")";
+
+		while ((element = element.parentElement) != null)
+		{
+			if (element.tagName === "BODY") {
+				selector = "BODY > " + selector;
+				break;
+			}
+			selector = element.tagName + ":nth-child(" + getIndexForSelector(element) + ") > " + selector;
+		}
+		return selector;
+	}
+
 	let captureEvents = (e) => 
 	{
 		let jsonObject: object = {
 			"id": "eventCount",
 			"Event": "et",
-			"Element": "trgt",
+			"ElementName": "Name",
+			"Selector": "Selector",
 			"Src": "src",
 			"Url": "url",
 			"CurrentUrl": "CurrentUrl"
@@ -37,8 +68,11 @@ function RecordingButton()
 			// Get Event Type (Click or Keyup or focus etc)
 			let et = evt.type?evt.type:evt;
 
-			// Get Events Target (Element from which event is bubbled)
-			let trgt = e.target.tagName;
+			// Get Events Target's tag name
+			let tagName = e.target.tagName;
+
+			// Get Events Selector
+			let selector = getSelector(e.target);
 
 			// Get Events source code
 			let src = e.target.parentNode.innerHTML;
@@ -48,7 +82,8 @@ function RecordingButton()
 
 			jsonObject.id= eventCount;
 			jsonObject.Event = et;
-			jsonObject.Element = trgt;
+			jsonObject.ElementName = tagName;
+			jsonObject.Selector = selector;
 			jsonObject.Src = src;
 			jsonObject.Url = url;
 			jsonObject.CurrentUrl = currentUrl;
@@ -132,7 +167,7 @@ function RecordingButton()
 
 				jsonEventObject.Event = jsonObjectArray;
 				const blob = new Blob([JSON.stringify(jsonEventObject, null, 4)], {type : 'application/json'});
-				saveAs(blob, 'abc.json');
+				saveAs(blob, 'event_details.json');
 			}
 		});
 	}, []);

@@ -32,7 +32,7 @@ function Form()
 					</select>
 				</label><br />
 
-				<button type="submit">Next</button>
+				<button type="button">Next</button>
 			</form>
 		</>
 	);
