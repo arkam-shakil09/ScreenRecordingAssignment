@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import $ from 'jquery';
 import { useState } from "react";
 import './index.css';
 import TextField from './TextField.js';
@@ -8,6 +9,15 @@ import Checkbox from './Checkbox.js';
 
 function Form()
 {
+	let returnJsonIfRecordingIsStarted = () => {
+		let isRecordingStarted = $("#togle-recording-button").attr("aria-label");
+
+		if (isRecordingStarted == "Stop Recording")
+		{
+			document.querySelector("#togle-recording-button").click();
+		}
+	}
+
 	return (
 		<>
 			<form>
@@ -32,7 +42,7 @@ function Form()
 					</select>
 				</label><br />
 
-				<button type="button">Next</button>
+				<button type="submit" onClick={returnJsonIfRecordingIsStarted}>Next</button>
 			</form>
 		</>
 	);

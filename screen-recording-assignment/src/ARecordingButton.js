@@ -1,18 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from "react";
+import { useReactMediaRecorder } from "react-media-recorder";
 import $ from 'jquery';
 import { saveAs } from 'file-saver';
 import './index.css';
 
 function RecordingButton()
 {
-	let [state, updatedState] = useState("Start Recording");
+	let [labelState, updatedLabelState] = useState("Start Recording");
+
+	const {
+		status,
+		startRecording: startRecord,
+		stopRecording: stopRecord,
+		mediaBlobUrl,
+	} = useReactMediaRecorder({ screen: true, audio: false });
+
 	let jsonEventObject: object = {"Event": ""};
 	let jsonObjectArray = [];
 	let eventCount = 1;
 	let url = "";
-	let keyMap = [];
+
 
 	let getIndexForSelector = (element) => {
 		let parent = element.parentNode;
@@ -75,19 +84,23 @@ function RecordingButton()
 				// Get Event Type (Click or Keyup or focus etc)
 				let et = evt.type?evt.type:evt;
 
-				// Get the key which was pressed
-				let filtered;
+				// Get Event Type (Click or Keyup or focus etc)
+				let keyPressed = "";
 				if (e instanceof KeyboardEvent)
 				{
-onkeydown = onkeyup = function (e) {
-//e = e || event;
-keyMap[e.key] = e.type == 'keydown';
-var keys = Object.keys(keyMap);
-var filtered = keys.filter(function (key) {
-return keyMap[key];
-});
-console.log(filtered);
-}
+					if (e.shiftKey === true)
+					{
+						keyPressed += "Shift + ";
+					}
+					if (e.ctrlKey === true)
+					{
+						keyPressed += "CTRL + ";
+					}
+					if (e.altKey === true)
+					{
+						keyPressed += "ALT + ";
+					}
+					keyPressed += e.key;
 				}
 
 				// Get Events Target's tag name
@@ -102,11 +115,9 @@ console.log(filtered);
 				//Get the current url
 				let currentUrl = window.location.href;
 
-				if (e.type != "keyup")
-				{
 				jsonObject.id= eventCount;
 				jsonObject.Event = et;
-				jsonObject.KeyPressed = filtered;
+				jsonObject.KeyPressed = keyPressed;
 				jsonObject.ElementName = tagName;
 				jsonObject.Selector = selector;
 				jsonObject.Src = src;
@@ -114,7 +125,6 @@ console.log(filtered);
 				jsonObject.CurrentUrl = currentUrl;
 				eventCount++;
 				jsonObjectArray.push(jsonObject);
-				}
 
 				//If the url changes, then change the url of 'url' variable
 				if (url != currentUrl)
@@ -125,66 +135,37 @@ console.log(filtered);
 		}
 	}
 
-	useEffect(() =>
+	let abc = () => 
 	{
 		url = window.location.href;
-		var mediaRecorder;
 		let recordingButton = document.querySelector("#togle-recording-button");
+		let events = ["click", "focus", "keydown", "keypressed"];
 
-		$(recordingButton).click(async function ()
-		{
-			let events = ["click", "focus", "keydown", "keyup"];
-
-			if ($(recordingButton).attr("aria-label") == "Start Recording")
+			if ($(recordingButton).text() == "Start Recording")
 			{
-				updatedState("Stop Recording");
-				try {
-					document.getElementById("download-button").remove();
-				}
-				catch {
-					let x = 0;
-				}
-
-				let mimeType = "video/webm";
-				let stream = await navigator.mediaDevices.getDisplayMedia({
-					audio: true, 
-					video: { mediaSource: "screen"}
-				});
-
-				let recordedChunks = []; 
-				mediaRecorder = new MediaRecorder(stream);
-				mediaRecorder.ondataavailable = function (e) {
-					if (e.data.size > 0) {
-						recordedChunks.push(e.data);
-					}  
-				};
-				mediaRecorder.onstop = function () {
-
-					const blob = new Blob(recordedChunks, {
-						type: 'video/webm'
-					});
-					let downloadLink = document.createElement('a');
-					downloadLink.innerText = "Download Recording";
-					downloadLink.setAttribute("id", "download-button");
-					downloadLink.setAttribute("role", "button");
-					downloadLink.href = URL.createObjectURL(blob);
-					downloadLink.download = "Recording.webm";
-					document.getElementById("controls-container").appendChild(downloadLink);
-
-					recordedChunks = [];
-				};
-				mediaRecorder.start(200); // For every 200ms the stream data will be stored in a separate chunk.
-
+				//Changing the state
+				updatedLabelState("Stop Recording")
+				startRecord();
 				//Adding events on body for capturing the events
 				for(let i=0; i<events.length; i++)
 				{
 					document.body.addEventListener("" + events[i] + "", captureEvents, false);
 				}
 			}
-			else if ($(recordingButton).attr("aria-label") == "Stop Recording")
+			else if ($(recordingButton).text() == "Stop Recording")
 			{
-				updatedState("Start Recording");
-				mediaRecorder.stop();
+				//Changing the state
+				updatedLabelState("Start Recording")
+				stopRecord();
+
+					let downloadLink = document.createElement('a');
+					downloadLink.innerText = "Download Recording";
+					downloadLink.setAttribute("id", "download-button");
+					downloadLink.setAttribute("role", "button");
+alert(mediaBlobUrl);
+					downloadLink.href = { mediaBlobUrl };
+					downloadLink.download = "Recording.webm";
+					document.getElementById("controls-container").appendChild(downloadLink);
 
 				//Removing the capture events event from the body
 				for(let i=0; i<events.length; i++)
@@ -196,18 +177,19 @@ console.log(filtered);
 				const blob = new Blob([JSON.stringify(jsonEventObject, null, 4)], {type : 'application/json'});
 				saveAs(blob, 'event_details.json');
 			}
-		});
-	}, []);
+	}
 
 	return (
 		<>
 			<div id="controls-container">
-				<button id="togle-recording-button" aria-label={state}>
-					{state}
+				<button id="togle-recording-button" onClick={abc}>
+					{labelState}
 				</button>
 
-<br />
-{keyMap}
+				<a id="download-recording-button" href={mediaBlobUrl} role="link">
+					Download Recording
+				</a>
+
 			</div>
 		</>
 	);

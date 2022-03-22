@@ -9,7 +9,7 @@ function FrontButton()
 	let showModal = (modalSelector, firstInteractiveElementOfModal, event) =>
 	{
 		event.target.classList.add("element-opacity");
-		$("body").attr("style", "background: rgba(00, 00, 00, 0.4);"); //classList.add("element-opacity");
+		document.querySelector("body").classList.add("element-opacity");
 		document.querySelector(modalSelector).classList.remove("hidden");
 		document.querySelector(modalSelector).classList.add("show");
 		document.querySelector(firstInteractiveElementOfModal).focus();

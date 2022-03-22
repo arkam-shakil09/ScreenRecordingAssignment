@@ -22,7 +22,7 @@ function Modal()
 			document.querySelector(modalSelector).classList.remove("show");
 			document.querySelector(modalSelector).classList.add("hidden");
 			document.querySelector(triggeredElement).classList.remove("element-opacity");
-			$("body").removeAttr("style");
+			document.querySelector("body").classList.remove("element-opacity");
 			document.querySelector(triggeredElement).focus();
 			window.history.back();
 		}
